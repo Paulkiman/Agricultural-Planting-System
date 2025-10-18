@@ -1,0 +1,291 @@
+spring:
+  application:
+    name: Agricultural Planting System
+  
+  # MySQL Database Configuration
+  datasource:
+    url: jdbc:mysql://localhost:3306/agricultural_planting_db?createDatabaseIfNotExist=true&useSSL=false&serverTimezone=Africa/Nairobi&allowPublicKeyRetrieval=true&characterEncoding=UTF-8
+    username: root
+    password: 1234
+    driver-class-name: com.mysql.cj.jdbc.Driver
+    
+    # HikariCP Connection Pool Settings
+    hikari:
+      pool-name: AgricultureHikariCP
+      minimum-idle: 5
+      maximum-pool-size: 20
+      idle-timeout: 300000
+      connection-timeout: 20000
+      max-lifetime: 1200000
+      auto-commit: true
+      connection-test-query: SELECT 1
+  
+  # JPA/Hibernate Configuration
+  jpa:
+    hibernate:
+      ddl-auto: update
+      naming:
+        physical-strategy: org.hibernate.boot.model.naming.PhysicalNamingStrategyStandardImpl
+        implicit-strategy: org.hibernate.boot.model.naming.ImplicitNamingStrategyLegacyJpaImpl
+    show-sql: true
+    properties:
+      hibernate:
+        format_sql: true
+        use_sql_comments: true
+        jdbc:
+          batch_size: 20
+          fetch_size: 50
+        order_inserts: true
+        order_updates: true
+        generate_statistics: false
+        enable_lazy_load_no_trans: false
+    open-in-view: false
+
+  # Jackson Configuration
+  jackson:
+    serialization:
+      write-dates-as-timestamps: false
+      indent-output: true
+      write-dates-with-zone-id: true
+    time-zone: Africa/Nairobi
+    default-property-inclusion: non_null
+    date-format: yyyy-MM-dd HH:mm:ss
+    deserialization:
+      fail-on-unknown-properties: false
+
+  # File Upload Configuration
+  servlet:
+    multipart:
+      enabled: true
+      max-file-size: 10MB
+      max-request-size: 10MB
+      file-size-threshold: 2KB
+
+  # SQL Initialization
+  sql:
+    init:
+      mode: never
+      continue-on-error: false
+
+# Server Configuration
+server:
+  port: 8080
+  servlet:
+    context-path: /api
+    encoding:
+      charset: UTF-8
+      enabled: true
+      force: true
+  error:
+    include-message: always
+    include-binding-errors: always
+    include-stacktrace: on_param
+    include-exception: false
+  compression:
+    enabled: true
+    mime-types: text/html,text/xml,text/plain,text/css,text/javascript,application/javascript,application/json
+    min-response-size: 1024
+
+# Logging Configuration
+logging:
+  level:
+    root: INFO
+    org.project.agricultural_planting_system: DEBUG
+    org.springframework.web: INFO
+    org.springframework.security: DEBUG
+    org.hibernate.SQL: DEBUG
+    org.hibernate.type.descriptor.sql.BasicBinder: TRACE
+    org.hibernate.orm.jdbc.bind: TRACE
+    com.zaxxer.hikari: INFO
+  pattern:
+    console: "%d{yyyy-MM-dd HH:mm:ss} - %logger{36} - %highlight(%-5level) - %msg%n"
+    file: "%d{yyyy-MM-dd HH:mm:ss} [%thread] %-5level %logger{36} - %msg%n"
+  file:
+    name: logs/agricultural-planting-system.log
+    max-size: 10MB
+    max-history: 30
+    total-size-cap: 1GB
+
+# Actuator Configuration
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info,metrics,prometheus,env,beans,loggers
+      base-path: /actuator
+  endpoint:
+    health:
+      show-details: when-authorized
+      show-components: when-authorized
+      probes:
+        enabled: true
+  health:
+    db:
+      enabled: true
+    diskspace:
+      enabled: true
+  info:
+    env:
+      enabled: true
+    java:
+      enabled: true
+    os:
+      enabled: true
+
+# API Documentation (Swagger/OpenAPI)
+springdoc:
+  api-docs:
+    path: /api-docs
+    enabled: true
+  swagger-ui:
+    path: /swagger-ui.html
+    enabled: true
+    operations-sorter: method
+    tags-sorter: alpha
+    display-request-duration: true
+    default-models-expand-depth: 1
+    default-model-expand-depth: 1
+    doc-expansion: none
+    filter: false
+    show-extensions: true
+    show-common-extensions: true
+  show-actuator: false
+  packages-to-scan: org.project.agricultural_planting_system.controller
+  paths-to-match: /**
+
+# Application-specific Configuration
+app:
+  name: Agricultural Planting System
+  version: 1.0.0
+  description: Seed planting and fertilizer estimation system for farmers
+
+  # CORS Configuration - ADDED THIS SECTION
+  cors:
+    allowed-origins: http://localhost:3000,http://localhost:5500,http://127.0.0.1:5500,http://localhost:8080
+    allowed-methods: GET,POST,PUT,DELETE,OPTIONS,PATCH
+    allowed-headers: "*"
+    allow-credentials: true
+    max-age: 3600
+
+  # Planting Configuration
+  planting:
+    default-seed-spacing-cm: 30.0
+    default-line-spacing-cm: 70.0
+    dap-grams-per-seed: 2.3
+    npk-grams-per-seed: 5.6
+    package-weight-kg: 90.0
+    sqm-per-acre: 4046.86
+    seeds-per-kg: 25000
+
+  # Business Rules
+  business:
+    min-land-dimension: 1.0
+    max-land-dimension: 100000.0
+    min-seed-price: 1.0
+    max-seed-price: 100000.0
+    min-fertilizer-price: 1.0
+    max-fertilizer-price: 100000.0
+
+---
+# ============================================================
+# Development Profile
+# ============================================================
+spring:
+  config:
+    activate:
+      on-profile: dev
+
+  datasource:
+    url: jdbc:mysql://localhost:3306/agricultural_planting_db_dev?createDatabaseIfNotExist=true&useSSL=false&serverTimezone=Africa/Nairobi&allowPublicKeyRetrieval=true
+    username: root
+    password: root
+    hikari:
+      maximum-pool-size: 10
+
+  jpa:
+    hibernate:
+      ddl-auto: create-drop
+    show-sql: true
+    properties:
+      hibernate:
+        format_sql: true
+
+logging:
+  level:
+    org.project.agricultural_planting_system: DEBUG
+    org.hibernate.SQL: DEBUG
+    org.hibernate.type.descriptor.sql.BasicBinder: TRACE
+
+server:
+  port: 8080
+
+---
+# ============================================================
+# Test Profile
+# ============================================================
+spring:
+  config:
+    activate:
+      on-profile: test
+
+  jpa:
+    hibernate:
+      ddl-auto: create-drop
+    show-sql: true
+    database-platform: org.hibernate.dialect.H2Dialect
+
+  h2:
+    console:
+      enabled: true
+      path: /h2-console
+
+logging:
+  level:
+    org.project.agricultural_planting_system: DEBUG
+
+---
+# ============================================================
+# Production Profile
+# ============================================================
+spring:
+  config:
+    activate:
+      on-profile: prod
+
+  datasource:
+    url: jdbc:mysql://production-mysql-server:3306/agricultural_planting_db?useSSL=true&requireSSL=true&serverTimezone=Africa/Nairobi
+    username: ${DB_USERNAME:prod_user}
+    password: ${DB_PASSWORD:prod_password}
+    hikari:
+      maximum-pool-size: 50
+      minimum-idle: 10
+      connection-timeout: 30000
+
+  jpa:
+    hibernate:
+      ddl-auto: validate
+    show-sql: false
+    properties:
+      hibernate:
+        format_sql: false
+        use_sql_comments: false
+
+logging:
+  level:
+    root: WARN
+    org.project.agricultural_planting_system: INFO
+    org.hibernate.SQL: WARN
+
+server:
+  port: ${SERVER_PORT:8443}
+  ssl:
+    enabled: false
+
+# Production CORS - More restrictive
+app:
+  cors:
+    allowed-origins: https://yourdomain.com,https://www.yourdomain.com
+    allowed-methods: GET,POST,PUT,DELETE,OPTIONS
+    allowed-headers: "*"
+    allow-credentials: true
+    max-age: 3600
